@@ -42,3 +42,7 @@ lib*.pc
 /Debug/
 /Release/
 /tmp_install/
+# building debian in place:
+/build-py3
+/build
+/debian
