@@ -344,6 +344,15 @@ static const internalPQconninfoOption PQconninfoOptions[] = {
 		"Target-Session-Attrs", "", 15, /* sizeof("prefer-standby") = 15 */
 	offsetof(struct pg_conn, target_session_attrs)},
 
+
+	/* keyword; envvar; compiled, val*/
+
+	{"request_source", "PG_MMC", NULL, NULL,
+	 // label; dispchar (in a connect dialog); dispsize
+	 // "D" debug option -- don't display by default.
+	 "request_source", "D", 5,
+	 offsetof(struct pg_conn, request_source)},
+	// src/interfaces/libpq/libpq-int.h
 	/* Terminating entry --- MUST BE LAST */
 	{NULL, NULL, NULL, NULL,
 	NULL, NULL, 0}

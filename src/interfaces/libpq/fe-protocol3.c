@@ -2269,6 +2269,10 @@ build_startup_packet(const PGconn *conn, char *packet,
 		}
 	}
 
+	if (conn->request_source && conn->request_source[0])
+		ADD_STARTUP_OPTION("request_source", conn->request_source);
+
+
 	/* Add trailing terminator */
 	if (packet)
 		packet[packet_len] = '\0';

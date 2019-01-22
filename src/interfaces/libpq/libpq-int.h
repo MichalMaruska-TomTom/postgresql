@@ -589,6 +589,9 @@ struct pg_conn
 
 	/* Buffer for receiving various parts of messages */
 	PQExpBufferData workBuffer; /* expansible string */
+
+	// why not bool
+	char   *request_source;	/* request the U messages with Source information */
 };
 
 /* PGcancel stores all data necessary to cancel a connection. A copy of this
