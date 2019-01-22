@@ -37,11 +37,11 @@
  */
 #define VALID_LONG_MESSAGE_TYPE(id) \
 	((id) == 'T' || (id) == 'D' || (id) == 'd' || (id) == 'V' || \
-	 (id) == 'E' || (id) == 'N' || (id) == 'A')
+	 (id) == 'E' || (id) == 'N' || (id) == 'A' || (id) == 'U')
 
 
 static void handleSyncLoss(PGconn *conn, char id, int msgLength);
-static int	getRowDescriptions(PGconn *conn, int msgLength);
+static int	getRowDescriptions(PGconn *conn, int msgLength, int u_msg);
 static int	getParamDescriptions(PGconn *conn, int msgLength);
 static int	getAnotherTuple(PGconn *conn, int msgLength);
 static int	getParameterStatus(PGconn *conn);
@@ -304,6 +304,7 @@ pqParseInput3(PGconn *conn)
 						return;
 					break;
 				case 'T':		/* Row Description */
+				case 'U':		/* Row Description */
 					if (conn->error_result ||
 						(conn->result != NULL &&
 						 conn->result->resultStatus == PGRES_FATAL_ERROR))
@@ -319,7 +320,7 @@ pqParseInput3(PGconn *conn)
 							  conn->cmd_queue_head->queryclass == PGQUERY_DESCRIBE))
 					{
 						/* First 'T' in a query sequence */
-						if (getRowDescriptions(conn, msgLength))
+						if (getRowDescriptions(conn, msgLength, id == 'U'))
 							return;
 					}
 					else
@@ -496,7 +497,7 @@ handleSyncLoss(PGconn *conn, char id, int msgLength)
  * (the latter case is not actually used currently).
  */
 static int
-getRowDescriptions(PGconn *conn, int msgLength)
+getRowDescriptions(PGconn *conn, int msgLength, int u_msg)
 {
 	PGresult   *result;
 	int			nfields;
@@ -554,6 +555,7 @@ getRowDescriptions(PGconn *conn, int msgLength)
 	/* get type info */
 	for (i = 0; i < nfields; i++)
 	{
+		int			varno;
 		int			tableid;
 		int			columnid;
 		int			typid;
@@ -562,8 +564,11 @@ getRowDescriptions(PGconn *conn, int msgLength)
 		int			format;
 
 		if (pqGets(&conn->workBuffer, conn) ||
+			/* only if some bit says the connection provides this: */
 			pqGetInt(&tableid, 4, conn) ||
 			pqGetInt(&columnid, 2, conn) ||
+
+			(u_msg?pqGetInt(&varno, 2, conn):(varno=0,0)) ||
 			pqGetInt(&typid, 4, conn) ||
 			pqGetInt(&typlen, 2, conn) ||
 			pqGetInt(&atttypmod, 4, conn) ||
@@ -589,6 +594,8 @@ getRowDescriptions(PGconn *conn, int msgLength)
 			errmsg = NULL;		/* means "out of memory", see below */
 			goto advance_and_error;
 		}
+		result->attDescs[i].varno = varno;
+
 		result->attDescs[i].tableid = tableid;
 		result->attDescs[i].columnid = columnid;
 		result->attDescs[i].format = format;

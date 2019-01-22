@@ -263,6 +263,11 @@ typedef struct pgresAttDesc
 	char	   *name;			/* column name */
 	Oid			tableid;		/* source table, if known */
 	int			columnid;		/* source column, if known */
+	int			varno;		/* source column, if known.
+						   if a table is used twice in
+						   the FROM part, tableid does not
+						   distinguish which one.
+						   So this does.*/
 	int			format;			/* format code for value (text/binary) */
 	Oid			typid;			/* type id */
 	int			typlen;			/* type size */
