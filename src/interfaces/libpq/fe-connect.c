@@ -899,14 +899,16 @@ fillPGconn(PGconn *conn, PQconninfoOption *connOptions)
 
 	for (option = PQconninfoOptions; option->keyword; option++)
 	{
-		if (option->connofs >= 0)
+		if (option->connofs >= 0) // mmc: offset into *conn!
 		{
+			// mmc: value: from connOptions !
 			const char *tmp = conninfo_getval(connOptions, option->keyword);
 
 			if (tmp)
 			{
 				char	  **connmember = (char **) ((char *) conn + option->connofs);
 
+				// drop the previous value:
 				if (*connmember)
 					free(*connmember);
 				*connmember = strdup(tmp);

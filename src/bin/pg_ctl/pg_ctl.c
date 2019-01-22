@@ -940,7 +940,7 @@ do_start(void)
 						 progname);
 	}
 
-	read_post_opts();
+	read_post_opts(); // mmc!
 
 	/* No -D or -D already added during server start */
 	if (ctl_command == RESTART_COMMAND || pgdata_opt == NULL)
@@ -2531,7 +2531,7 @@ main(int argc, char **argv)
 	}
 
 	/* -D might point at config-only directory; if so find the real PGDATA */
-	adjust_data_dir();
+	adjust_data_dir(); // mmc!
 
 	/* Complain if -D needed and not provided */
 	if (pg_config == NULL &&
