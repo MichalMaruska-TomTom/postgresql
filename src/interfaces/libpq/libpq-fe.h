@@ -530,6 +530,8 @@ extern int	PQnfields(const PGresult *res);
 extern int	PQbinaryTuples(const PGresult *res);
 extern char *PQfname(const PGresult *res, int field_num);
 extern int	PQfnumber(const PGresult *res, const char *field_name);
+
+extern int	PQfsource(const PGresult *res, int field_num);
 extern Oid	PQftable(const PGresult *res, int field_num);
 extern int	PQftablecol(const PGresult *res, int field_num);
 extern int	PQfformat(const PGresult *res, int field_num);
