@@ -2181,6 +2181,7 @@ retry1:
 	 * we fail during startup.
 	 */
 	FrontendProtocol = proto;
+	send_source_table = 0;
 
 	/* Check that the major protocol version is in range. */
 	if (PG_PROTOCOL_MAJOR(proto) < PG_PROTOCOL_MAJOR(PG_PROTOCOL_EARLIEST) ||

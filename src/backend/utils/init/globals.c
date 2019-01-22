@@ -26,6 +26,7 @@
 
 
 ProtocolVersion FrontendProtocol;
+int send_source_table;
 
 volatile sig_atomic_t InterruptPending = false;
 volatile sig_atomic_t QueryCancelPending = false;
