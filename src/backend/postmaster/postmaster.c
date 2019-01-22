@@ -2267,6 +2267,12 @@ retry1:
 				unrecognized_protocol_options =
 					lappend(unrecognized_protocol_options, pstrdup(nameptr));
 			}
+			else if (strcmp(nameptr, "request_source") == 0)
+			{
+				// I don't care about the value?
+				elog(LOG_SERVER_ONLY, "requested sources!");
+				send_source_table = 1;
+			}
 			else
 			{
 				/* Assume it's a generic GUC option */
