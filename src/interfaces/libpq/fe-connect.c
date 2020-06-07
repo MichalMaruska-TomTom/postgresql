@@ -347,6 +347,7 @@ static const internalPQconninfoOption PQconninfoOptions[] = {
 
 	/* keyword; envvar; compiled, val*/
 
+	// fallback from this env variable. But I need it to override!
 	{"request_source", "PG_MMC", NULL, NULL,
 	 // label; dispchar (in a connect dialog); dispsize
 	 // "D" debug option -- don't display by default.
