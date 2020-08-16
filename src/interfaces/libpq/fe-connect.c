@@ -6792,6 +6792,20 @@ PQpass(const PGconn *conn)
 	return password;
 }
 
+char*
+PQsourceInfo(const PGconn *conn)
+{
+	if (!conn)
+		return NULL;
+
+	if (conn->force_U_message)
+		return "U";
+	else if (conn->request_source)
+		return "R";
+	else return "";
+}
+
+
 char *
 PQhost(const PGconn *conn)
 {

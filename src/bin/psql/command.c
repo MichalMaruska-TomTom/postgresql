@@ -640,6 +640,7 @@ exec_command_conninfo(PsqlScanState scan_state, bool active_branch)
 					printf(_("You are connected to database \"%s\" as user \"%s\" on host \"%s\" at port \"%s\".\n"),
 						   db, PQuser(pset.db), host, PQport(pset.db));
 			}
+			printf("source_info: %s\n", PQsourceInfo(pset.db));
 			printSSLInfo();
 			printGSSInfo();
 		}
