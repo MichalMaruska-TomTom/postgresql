@@ -2269,9 +2269,19 @@ build_startup_packet(const PGconn *conn, char *packet,
 		}
 	}
 
+	// y -> enable
+	// n -> disable
+	// a -> enable & ask for it.
+	if ((val = getenv("PG_MMC")) != NULL)
+		{
+			if (pg_strcasecmp(val, "a") != 0)
+				goto skip_over;
+		}
+
 	if (conn->request_source && conn->request_source[0])
 		ADD_STARTUP_OPTION("request_source", conn->request_source);
 
+skip_over:
 
 	/* Add trailing terminator */
 	if (packet)
