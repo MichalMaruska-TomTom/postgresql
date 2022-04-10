@@ -320,7 +320,7 @@ pqParseInput3(PGconn *conn)
 							  conn->cmd_queue_head->queryclass == PGQUERY_DESCRIBE))
 					{
 						/* First 'T' in a query sequence */
-						if (getRowDescriptions(conn, msgLength, id == 'U'))
+						if (getRowDescriptions(conn, msgLength, (conn->force_U_message || id == 'U')))
 							return;
 					}
 					else
@@ -2272,8 +2272,13 @@ build_startup_packet(const PGconn *conn, char *packet,
 	// y -> enable
 	// n -> disable
 	// a -> enable & ask for it.
+	((PGconn *)conn)->force_U_message = 0;
 	if ((val = getenv("PG_MMC")) != NULL)
 		{
+			if (pg_strcasecmp(val, "y") == 0)
+				// not const!
+				((PGconn *)conn)->force_U_message = 1;
+
 			if (pg_strcasecmp(val, "a") != 0)
 				goto skip_over;
 		}
