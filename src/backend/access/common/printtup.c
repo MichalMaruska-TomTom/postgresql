@@ -15,6 +15,7 @@
  */
 #include "postgres.h"
 
+#include "nodes/nodes.h"
 #include "access/printtup.h"
 #include "libpq/libpq.h"
 #include "libpq/pqformat.h"
@@ -171,7 +172,7 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 	ListCell   *tlist_item = list_head(targetlist);
 
 	/* tuple descriptor message type */
-	pq_beginmessage_reuse(buf, 'T');
+	pq_beginmessage_reuse(buf, send_source_table?'U':'T');
 	/* # of attrs in tuples */
 	pq_sendint16(buf, natts);
 
@@ -186,6 +187,7 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 	enlargeStringInfo(buf, (NAMEDATALEN * MAX_CONVERSION_GROWTH /* attname */
 							+ sizeof(Oid)	/* resorigtbl */
 							+ sizeof(AttrNumber)	/* resorigcol */
+							+ (send_source_table?sizeof(int16):0) /* attsource */
 							+ sizeof(Oid)	/* atttypid */
 							+ sizeof(int16) /* attlen */
 							+ sizeof(int32) /* attypmod */
@@ -200,6 +202,7 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 		Oid			resorigtbl;
 		AttrNumber	resorigcol;
 		int16		format;
+		int16		sourcetable;
 
 		/*
 		 * If column is a domain, send the base type and typmod instead.
@@ -217,10 +220,26 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 
 			resorigtbl = tle->resorigtbl;
 			resorigcol = tle->resorigcol;
+
 			tlist_item = lnext(targetlist, tlist_item);
+			if (send_source_table)
+			{
+				Expr *type = tle->expr; // This is an Expr base class.
+				if (type->type == T_Var) {
+					Var *source = castNode(Var, type);
+					sourcetable = (short int)source->varnosyn;
+					// source->varno is not good!
+					// source->varnosyn seems ok too!
+				}
+				else
+				{
+					sourcetable = -1;
+				}
+			}
 		}
 		else
 		{
+			sourcetable = -1;
 			/* No info available, so send zeroes */
 			resorigtbl = 0;
 			resorigcol = 0;
@@ -234,6 +253,8 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 		pq_writestring(buf, NameStr(att->attname));
 		pq_writeint32(buf, resorigtbl);
 		pq_writeint16(buf, resorigcol);
+		if (send_source_table)
+			pq_writeint16(buf, sourcetable);
 		pq_writeint32(buf, atttypid);
 		pq_writeint16(buf, att->attlen);
 		pq_writeint32(buf, atttypmod);
