@@ -194,6 +194,9 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 							+ sizeof(int16) /* format */
 							) * natts);
 
+	errstart(LOG_SERVER_ONLY, NULL);
+	errhidestmt(true);
+
 	for (i = 0; i < natts; ++i)
 	{
 		Form_pg_attribute att = TupleDescAttr(typeinfo, i);
@@ -230,6 +233,11 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 					sourcetable = (short int)source->varnosyn;
 					// source->varno is not good!
 					// source->varnosyn seems ok too!
+
+					errmsg("the source is %hu, varno %u, location %d, varnosyn %u, varlevelsup %u",
+						 sourcetable,
+						 source->varno, source->location,
+						 source->varnosyn, source->varlevelsup);
 				}
 				else
 				{
@@ -261,6 +269,7 @@ SendRowDescriptionMessage(StringInfo buf, TupleDesc typeinfo,
 		pq_writeint16(buf, format);
 	}
 
+	errfinish(NULL, 1, __func__);
 	pq_endmessage_reuse(buf);
 }
 
