@@ -46,3 +46,4 @@ lib*.pc
 /build-py3
 /build
 /debian
+src/cscope.*
