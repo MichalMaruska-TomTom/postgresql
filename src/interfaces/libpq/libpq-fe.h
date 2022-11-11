@@ -263,6 +263,11 @@ typedef struct pgresAttDesc
 	char	   *name;			/* column name */
 	Oid			tableid;		/* source table, if known */
 	int			columnid;		/* source column, if known */
+	int			varno;		/* source column, if known.
+						   if a table is used twice in
+						   the FROM part, tableid does not
+						   distinguish which one.
+						   So this does.*/
 	int			format;			/* format code for value (text/binary) */
 	Oid			typid;			/* type id */
 	int			typlen;			/* type size */
@@ -341,6 +346,9 @@ extern char *PQhost(const PGconn *conn);
 extern char *PQhostaddr(const PGconn *conn);
 extern char *PQport(const PGconn *conn);
 extern char *PQtty(const PGconn *conn);
+
+extern char* PQsourceInfo(const PGconn *conn);
+
 extern char *PQoptions(const PGconn *conn);
 extern ConnStatusType PQstatus(const PGconn *conn);
 extern PGTransactionStatusType PQtransactionStatus(const PGconn *conn);
@@ -525,6 +533,8 @@ extern int	PQnfields(const PGresult *res);
 extern int	PQbinaryTuples(const PGresult *res);
 extern char *PQfname(const PGresult *res, int field_num);
 extern int	PQfnumber(const PGresult *res, const char *field_name);
+
+extern int	PQfsource(const PGresult *res, int field_num);
 extern Oid	PQftable(const PGresult *res, int field_num);
 extern int	PQftablecol(const PGresult *res, int field_num);
 extern int	PQfformat(const PGresult *res, int field_num);

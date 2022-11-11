@@ -3429,6 +3429,18 @@ check_param_number(const PGresult *res, int param_num)
 	return true;
 }
 
+int
+PQfsource(const PGresult *res, int field_num)
+{
+	if (!check_field_number(res, field_num))
+		return 0;
+	if (res->attDescs)
+		return res->attDescs[field_num].varno;
+	else
+		return 0;
+}
+
+
 /*
  * returns NULL if the field_num is invalid
  */

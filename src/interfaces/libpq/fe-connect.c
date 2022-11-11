@@ -344,6 +344,16 @@ static const internalPQconninfoOption PQconninfoOptions[] = {
 		"Target-Session-Attrs", "", 15, /* sizeof("prefer-standby") = 15 */
 	offsetof(struct pg_conn, target_session_attrs)},
 
+
+	/* keyword; envvar; compiled, val*/
+
+	// fallback from this env variable. But I need it to override!
+	{"request_source", "PG_MMC", NULL, NULL,
+	 // label; dispchar (in a connect dialog); dispsize
+	 // "D" debug option -- don't display by default.
+	 "request_source", "D", 5,
+	 offsetof(struct pg_conn, request_source)},
+	// src/interfaces/libpq/libpq-int.h
 	/* Terminating entry --- MUST BE LAST */
 	{NULL, NULL, NULL, NULL,
 	NULL, NULL, 0}
@@ -890,14 +900,16 @@ fillPGconn(PGconn *conn, PQconninfoOption *connOptions)
 
 	for (option = PQconninfoOptions; option->keyword; option++)
 	{
-		if (option->connofs >= 0)
+		if (option->connofs >= 0) // mmc: offset into *conn!
 		{
+			// mmc: value: from connOptions !
 			const char *tmp = conninfo_getval(connOptions, option->keyword);
 
 			if (tmp)
 			{
 				char	  **connmember = (char **) ((char *) conn + option->connofs);
 
+				// drop the previous value:
 				if (*connmember)
 					free(*connmember);
 				*connmember = strdup(tmp);
@@ -6782,6 +6794,20 @@ PQpass(const PGconn *conn)
 		password = "";
 	return password;
 }
+
+char*
+PQsourceInfo(const PGconn *conn)
+{
+	if (!conn)
+		return NULL;
+
+	if (conn->force_U_message)
+		return "U";
+	else if (conn->request_source)
+		return "R";
+	else return "";
+}
+
 
 char *
 PQhost(const PGconn *conn)
